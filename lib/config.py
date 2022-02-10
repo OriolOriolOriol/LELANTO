@@ -148,6 +148,12 @@ def StepTHREE_Enumeration():
     except IndexError as e:
         print(f"{error} Windows Server offline..\n")
         sys.exit(0)
+    
+    command99=command0 + " Get-NetDomainController | select IPAddress"
+    value=powershell_commandLine(command99)
+    IPDomainController=cleanstring(value)
+    IPDomainController=IPDomainController.split("\n")
+    IPDomainController=IPDomainController[-1]
     command2=command0 + " Get-DomainSID"
     value=powershell_commandLine(command2)
     domainSID=cleanstring(value)
@@ -159,7 +165,7 @@ def StepTHREE_Enumeration():
         ou=ou[3:]
         ou=listToString(ou)
         table=[["Forest",forest],["Domain",domain],["Domain Controller",domain_controller],
-        ["SID Domain",domainSID],["Organization Unit",ou]]
+        ["SID Domain",domainSID],["Organization Unit",ou],["IP DC",IPDomainController]]
         headers=["Oggetto","Value"]
         #PRINT Forest,Domain,Domain Controller,SID Domain, OU
         print(tabulate(table,headers,tablefmt="fancy_grid"))
