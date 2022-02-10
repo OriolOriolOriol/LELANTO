@@ -5,7 +5,7 @@ import time,os,sys
 #Starting with the hacking 
 def stepFOUR_PrivilegeEsc():
     print(f"\n{ok} 4-Starting with elevate privileges to local administrator...\n")
-    print(f"{warning} A-Check Unquoted path services vulnerabilities...")
+    print(f"{warning} A- Check Unquoted path services vulnerabilities...")
     checking=0
     while(checking==0):
         time.sleep(2)
@@ -35,7 +35,7 @@ def stepFOUR_PrivilegeEsc():
             checking=1
     
     time.sleep(1)
-    print(f"\n{warning} B-Check writeable Service Executable...")
+    print(f"\n{warning} B- Check Writeable Service Executable...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -47,9 +47,9 @@ def stepFOUR_PrivilegeEsc():
         print(value)
         value=value.split("\n")
         if(len(value) == 1):
-            print(f"{error} No writeable service executable FOUND")
+            print(f"{error} No Writeable service executable FOUND")
         else:
-            print(f"{ok} writeable service executable FOUND\n")
+            print(f"{ok} Writeable service executable FOUND\n")
             time.sleep(2)
             print(f"{ok} How can you exploit this vuln...\n")
             print(f"{ok} A-Create with msfvenom a payload to add new user")
@@ -58,7 +58,7 @@ def stepFOUR_PrivilegeEsc():
             print(f"{ok} D-Rename with the name of that dir and reload the machine")
             x=input(f"{ok} When you finished press ENTER..\n")
     except Exception as e:
-        print(f"{error} No writeable service executable FOUND")
+        print(f"{error} No Writeable service executable FOUND")
     
     time.sleep(1)
     print(f"\n{warning} C- Check AS-REP Roasting on the domains...")
