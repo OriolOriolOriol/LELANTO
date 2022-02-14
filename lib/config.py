@@ -8,6 +8,7 @@ username=getpass.getuser()
 lista_tools=["PowerView.ps1","PowerUp.ps1"]
 root=f"C:\\Users\\{username}\\Desktop\\Lelanto\\"
 data=f"{root}data\\"
+mimikatz=data+"x64\\"+"mimikatz.exe"
 ok=f"{Fore.GREEN}[INFO]{Fore.WHITE}"
 error=f"{Fore.RED}[ERROR]{Fore.WHITE}"
 warning=f"{Fore.YELLOW}[WARNING]{Fore.WHITE}"
@@ -76,7 +77,14 @@ def stepTWO_Installing_tools():
             count=count+1
         else:
             lista_tool_mancanti.append(tool)
+    
+    path=data+"x64\\"+"mimikatz.exe"
+    found=os.path.isfile(path)
+    if found:
+        print(f"{ok} {count}) Program mimikatz FOUND!!!")
+        count=count+1
 
+    '''
     if len(lista_tool_mancanti) > 0:
         response = os.system("ping " + ping)
         if response == 0:
@@ -88,7 +96,7 @@ def stepTWO_Installing_tools():
         else:
             print (f"{errore} The server is down!!!")
    
-
+    '''
 
 def title():
     print(Fore.BLUE)

