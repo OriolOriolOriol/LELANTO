@@ -29,7 +29,7 @@ def configurazione():
 
 
 def powershell_commandLine(cmd):
-    completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
+    completed = subprocess.run(["powershell","-Command", cmd], capture_output=True)
     return completed
 
 def cleanstring(string):
@@ -47,9 +47,9 @@ def stepONE_setupPolicy():
         print(error + " An error occured: %s", hello_info.stderr)
     else:
         value=cleanstring(value)
-        if value != "RemoteSigned":
+        if value != "Unrestricted":
             print(f"{warning} The actual policy doesn't run any powershell script...Now I'll change it")
-            policy="Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+            policy="Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted"
             value=powershell_commandLine(policy)
             policy="Get-ExecutionPolicy"
             value=powershell_commandLine(policy)
@@ -60,7 +60,16 @@ def stepONE_setupPolicy():
                 print(f"{ok} Actual state: {value}")
         else:
             print(f"{ok} Actual state: {value}")
-    
+
+    print(f"{warning} Check Constrained Language Mode...")
+    policy="$ExecutionCOntext.SessionState.LanguageMode"
+    value=powershell_commandLine(policy)
+    value=cleanstring(value)
+    if value == "FullLanguage":
+        print(f"{ok} Unconstrained language mode")
+    else:
+        print(f"{warning} Constrained language mode")
+        
     print(f"\n{warning} Check Server status...")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = sock.connect_ex((IpServer, 80))
