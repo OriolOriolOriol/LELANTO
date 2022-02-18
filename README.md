@@ -11,8 +11,10 @@ Analyzes possible vulnerabilities within an AD
 ```
 python3 -m pip install colorama
 python3 -m pip install tabulate
+
+On config.py you must change IP of the server
 ```
-Besides you can run a server on Linux where there are PowerView,PowerUp and Mimikatz. On *config.py* you must change IP of the server
+Besides you can run a server on Linux where there are PowerView,PowerUp and Mimikatz file. 
 
 ## How to run?
 
