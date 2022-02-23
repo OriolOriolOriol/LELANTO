@@ -175,9 +175,17 @@ def StepTHREE_Enumeration():
         list_account=cleanstring(value)
         list_account=list_account.split("\n")
         list_account=list_account[3:]
-        tableUser=PrettyTable(["Username","Account"])
-        for user,account in zip(list_user,list_account):
-            tableUser.add_row([user.rstrip(),account.rstrip()])
+
+        command7=command0+ " Get-NetUser | select description"
+        value=powershell_commandLine(command7)
+        list_description=cleanstring(value)
+        list_description=list_description.split("\n")
+        list_description=list_description[3:]
+
+
+        tableUser=PrettyTable(["Username","Account","Description"])
+        for user,account,description in zip(list_user,list_account,list_description):
+            tableUser.add_row([user.rstrip(),account.rstrip(),description.rstrip()])
         
         #PRINT USERNAME IN THE DOMAIN
         print(tableUser)

