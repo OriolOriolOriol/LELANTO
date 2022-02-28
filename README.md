@@ -4,7 +4,7 @@
 Lelanto (in greece: Λήλαντος) was one of the Teen Titans . Probable god of the air, movement not discernible to the eye, and ability of the hunter to stalk the prey.
 
 ## Target
-Analyzes possible vulnerabilities within an AD
+Analyzes possible vulnerabilities within an Active Directory (AD). You must run LELANTO in a computer in the domain of the AD
 
 ## Dependencies
 
