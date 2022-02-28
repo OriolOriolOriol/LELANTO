@@ -21,3 +21,9 @@ Besides you can run a server on Linux where there are PowerView,PowerUp and Mimi
 ```
 python3 Lelanto.py
 ```
+
+## Notes
+Use RunFinger.py to verify if SMB Signing is enabled or not if you use Responder to intercept LLMNR or NBT-NS request.
+```
+python3 RunFinger.py -i <IP of the target>
+```
