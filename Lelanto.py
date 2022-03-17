@@ -149,7 +149,7 @@ def stepFOUR_PrivilegeEsc():
         else:
             print(f"\n{ok} User in Backup Operators FOUND\n")
             time.sleep(2)
-            command1=command0 + 'Get-NetGroupMember -Name "Remote Management Users" | select MemberName'
+            command1=command0 + 'Get-NetGroupMember -FullData -Name "Remote Management Users" | select MemberName'
             value=powershell_commandLine(command1)
             value=cleanstring(value)
             print(value)
