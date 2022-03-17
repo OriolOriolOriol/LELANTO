@@ -190,19 +190,19 @@ def StepTHREE_Enumeration():
         #PRINT USERNAME IN THE DOMAIN
         print(tableUser)
 
-        command4=command0+ " Get-NetComputer | select cn"
+        command4=command0+ " Get-NetComputer -FullData | select cn"
         value=powershell_commandLine(command4)
         list_pc=cleanstring(value)
         list_pc=list_pc.split("\n")
         list_pc=list_pc[3:]
 
-        command5=command0+ " Get-NetComputer | select operatingsystem"
+        command5=command0+ " Get-NetComputer  -FullData | select operatingsystem"
         value=powershell_commandLine(command5)
         list_os=cleanstring(value)
         list_os=list_os.split("\n")
         list_os=list_os[3:]
 
-        command7=command0+ " Get-NetComputer -Ping | select name"
+        command7=command0+ " Get-NetComputer  -FullData -Ping | select name"
         value=powershell_commandLine(command7)
         list_alive=cleanstring(value)
         list_alive=list_alive.split("\n")
